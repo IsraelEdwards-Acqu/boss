@@ -1,0 +1,28 @@
+{
+  "name": "Base Of Sale System",
+  "short_name": "Boss",
+  "id": "/",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0d6efd",
+  "theme_color": "#03173d",
+  "description": "Fast, secure, and receptionist-friendly BOSS-system.",
+  "orientation": "portrait",
+  "scope": "/",
+  "lang": "en",
+  "prefer_related_applications": false,
+  "icons": [
+    {
+      "src": "icon-192.png",
+      "type": "image/png",
+      "sizes": "192x192",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "icon-512.png",
+      "type": "image/png",
+      "sizes": "512x512",
+      "purpose": "any maskable"
+    }
+  ]
+}

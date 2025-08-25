@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Boss : Base Of Sale System</title>
+    <base href="/" />
+
+    <!-- SEO & PWA Metadata -->
+    <meta name="description" content="Boss : Base Of Sale System – Fast, Secure, And Receptionist-Friendly." />
+    <meta name="theme-color" content="#0d6efd" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="Boss" />
+
+    <!-- Styles -->
+    <link rel="stylesheet" href="css/app.css" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" crossorigin="anonymous" />
+
+    <!-- Icons & Manifest -->
+    <link rel="icon" type="image/x-icon" href="favicon.ico" />
+    <link rel="manifest" href="manifest.webmanifest" />
+    <link rel="apple-touch-icon" sizes="512x512" href="icon-512.png" />
+    <link rel="apple-touch-icon" sizes="192x192" href="icon-192.png" />
+
+    <!-- Preload critical assets -->
+    <link rel="preload" href="_framework/blazor.webassembly.js" as="script" />
+</head>
+<body>
+    <div id="app">
+        <div id="CustomLoader" class="spinner">
+            <div class="spinner">
+                <div id="square-1"></div>
+                <div id="square-2"></div>
+                <div id="square-3"></div>
+                <div id="square-4"></div>
+                <div id="square-5"></div>
+                <div id="square-6"></div>
+                <div id="square-7"></div>
+                <div id="square-8"></div>
+                <div id="square-9"></div>
+                <div id="square-10"></div>
+                <div id="square-11"></div>
+                <div id="square-12"></div>
+                <div id="square-13"></div>
+                <div id="square-14"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Install Button -->
+    <div class="position-fixed bottom-0 start-0 p-3">
+        <button id="install-btn" class="btn btn-primary" style="display:none;">Install BOSS</button>
+    </div>
+    <!-- Update Toast -->
+    <div class="toast-container position-fixed bottom-0 end-0 p-3">
+        <div id="updateToast" class="toast align-items-center text-bg-primary border-0" role="alert" aria-live="assertive" aria-atomic="true">
+            <div class="d-flex">
+                <div class="toast-body">
+                    A new version of Boss is available.
+                    <button class="btn btn-sm btn-light ms-2" onclick="triggerBlazorRefresh()">Refresh</button>
+                </div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+            </div>
+        </div>
+    </div>
+
+    <!-- JS Libraries -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <!-- Blazor WebAssembly -->
+    <script src="_framework/blazor.webassembly.js"></script>
+
+    <!-- Service Worker Registration -->
+    <script>
+        let swRegistration;
+
+        if ('serviceWorker' in navigator /* register in dev too if you prefer */) {
+            navigator.serviceWorker.register('service-worker.js')
+                .then(reg => {
+                    swRegistration = reg;
+                    console.log('Service worker registered:', reg);
+
+                    reg.onupdatefound = () => {
+                        const newWorker = reg.installing;
+                        if (!newWorker) return;
+                        newWorker.onstatechange = () => {
+                            if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                                showUpdateToast();
+                            }
+                        };
+                    };
+                })
+                .catch(err => console.error('Service worker registration failed:', err));
+        }
+
+        function showUpdateToast() {
+            const toastEl = document.getElementById('updateToast');
+            if (!toastEl) return;
+            const toast = new bootstrap.Toast(toastEl);
+            toast.show();
+        }
+
+        // Attempt to refresh via .NET method; fallback to hard reload
+        function triggerBlazorRefresh() {
+            const tryDotNet = () =>
+                typeof DotNet !== 'undefined' && DotNet.invokeMethodAsync
+                    ? DotNet.invokeMethodAsync('Boss', 'TriggerRefresh').catch(() => location.reload())
+                    : Promise.resolve(location.reload());
+
+            // If a waiting SW exists, ask it to activate, then refresh
+            if (swRegistration && swRegistration.waiting) {
+                swRegistration.waiting.postMessage({ type: 'SKIP_WAITING' });
+                navigator.serviceWorker.addEventListener('controllerchange', () => {
+                    // force reload after the new SW takes control
+                    location.reload();
+                });
+            } else {
+                tryDotNet();
+            }
+        }
+    </script>
+
+    <!-- Custom Install Prompt -->
+    <script>
+        let deferredPrompt;
+        window.addEventListener('beforeinstallprompt', e => {
+            e.preventDefault();
+            deferredPrompt = e;
+            const installBtn = document.getElementById('install-btn');
+            installBtn.style.display = 'block';
+            installBtn.addEventListener('click', async () => {
+                installBtn.style.display = 'none';
+                deferredPrompt.prompt();
+                await deferredPrompt.userChoice;
+                deferredPrompt = null;
+            });
+        });
+    </script>
+    <script>
+        window.downloadReceiptPdf = async (htmlContent, filename) => {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+
+            const logoUrl = "icon-192.png"; // Replace with your actual logo path
+            const qrData = htmlContent.includes("Receipt No:")
+                ? htmlContent.match(/Receipt No:\s*(RCPT-[\d\-]+)/)?.[1] || "RCPT-UNKNOWN"
+                : "RCPT-UNKNOWN";
+
+            const totalMatch = htmlContent.match(/Total:\s*GHS\s*(\d+(\.\d+)?)/);
+            const total = totalMatch ? totalMatch[1] : "0.00";
+
+            const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=120x120&data=Receipt:${qrData},Total:GHS ${total},Contact:0244736472`;
+
+            const logoImg = new Image();
+            logoImg.src = logoUrl;
+
+            logoImg.onload = async () => {
+                // Center logo
+                const pageWidth = doc.internal.pageSize.getWidth();
+                const logoWidth = 30;
+                const logoX = (pageWidth - logoWidth) / 2;
+
+                doc.addImage(logoImg, 'PNG', logoX, 10, logoWidth, logoWidth);
+                doc.setFontSize(14);
+                doc.text("CapitalPrint", pageWidth / 2, 45, { align: "center" });
+
+                // Convert HTML to plain text
+                const text = htmlContent.replace(/<[^>]+>/g, '');
+                doc.setFontSize(10);
+                doc.text(text, 10, 60);
+
+                // Add QR code
+                const qrImg = new Image();
+                qrImg.src = qrUrl;
+
+                qrImg.onload = () => {
+                    const qrX = (pageWidth - 30) / 2;
+                    doc.addImage(qrImg, 'PNG', qrX, doc.lastAutoTable ? doc.lastAutoTable.finalY + 10 : 120, 30, 30);
+                    doc.setFontSize(8);
+                    doc.text("Powered by Kicso", pageWidth / 2, 280, { align: "center" });
+                    doc.save(filename);
+                };
+
+                qrImg.onerror = () => {
+                    console.warn("QR code failed to load.");
+                    doc.text("Powered by Kicso", pageWidth / 2, 280, { align: "center" });
+                    doc.save(filename);
+                };
+            };
+
+            logoImg.onerror = () => {
+                console.warn("Logo failed to load.");
+                const text = htmlContent.replace(/<[^>]+>/g, '');
+                doc.text(text, 10, 10);
+                doc.save(filename);
+            };
+        };
+    </script>
+
+    <script>
+        window.getInnerHTML = function (elementId) {
+            const el = document.getElementById(elementId);
+            return el ? el.innerHTML : '';
+        };
+    </script>
+    <script>
+        window.printReceiptContent = function (elementId) {
+            const el = document.getElementById(elementId);
+            if (!el) return;
+
+            const receiptHtml = el.innerHTML;
+
+            const win = window.open('', '_blank');
+            win.document.write(`
+                                <html>
+                                    <head>
+                                        <title>Receipt</title>
+                                        <style>
+                                            body { font-family: monospace; width: 80mm; padding: 10px; }
+                                            img { display: block; margin: 0 auto; }
+                                            hr { border: none; border-top: 1px dashed #000; margin: 8px 0; }
+                                            .text-center { text-align: center; }
+                                            .text-end { text-align: right; }
+                                            .small { font-size: 10px; }
+                                            .text-muted { color: #555; }
+                                        </style>
+                                    </head>
+                                    <body onload="window.print();">
+                                        ${receiptHtml}
+                                    </body>
+                                </html>
+                            `);
+            win.document.close();
+        };
+    </script>
+
+
+    <script>
+        // Minimum loading time in milliseconds (50 seconds)
+        const minLoadingTime = 70000;
+        const loader = document.getElementById('CustomLoader');
+        const start = Date.now();
+
+        window.addEventListener('DOMContentLoaded', () => {
+            const elapsed = Date.now() - start;
+            const remaining = minLoadingTime - elapsed;
+            setTimeout(() => {
+                if (loader) loader.style.display = 'none';
+            }, remaining > 0 ? remaining : 0);
+        });
+    </script>
+    <!-- PDF export helpers -->
+    <script>
+        window.downloadSalesReportPdf = (plainText, filename) => {
+            const { jsPDF } = window.jspdf;
+            if (!jsPDF) { console.error('jsPDF missing'); return; }
+
+            const doc = new jsPDF({ orientation: "landscape" });
+
+            // Split plainText into lines and parse header/data
+            const lines = plainText.split('\n').filter(l => l.trim().length > 0);
+            let y = 20;
+
+            // Title
+            doc.setFontSize(18);
+            doc.text("Sales Report", 148, y, { align: "center" });
+            y += 12;
+
+            // Date
+            doc.setFontSize(10);
+            doc.text("Exported: " + new Date().toLocaleString(), 10, y);
+            y += 8;
+
+            // Table header
+            doc.setFontSize(12);
+            doc.setFillColor(220, 220, 220);
+            doc.rect(10, y - 6, 277, 10, 'F');
+            const headers = ["Product", "Color", "Type", "Qty", "Unit Price", "Total", "Time", "Buyer"];
+            let x = 10;
+            const colWidths = [40, 22, 22, 15, 28, 28, 55, 45];
+            headers.forEach((h, i) => { doc.text(h, x + 2, y); x += colWidths[i]; });
+            y += 8;
+
+            // Table rows (skip first 3 lines: title, blank, headers)
+            doc.setFontSize(10);
+            for (let i = 3; i < lines.length; i++) {
+                const row = lines[i].split('\t');
+                if (row.length < 8) continue;
+                x = 10;
+                row.forEach((cell, j) => { doc.text(cell, x + 2, y); x += colWidths[j]; });
+                y += 7;
+                if (y > 190) { doc.addPage("landscape"); y = 20; }
+            }
+
+            // Footer
+            doc.setFontSize(9);
+            doc.setTextColor(120, 120, 120);
+            doc.text("Powered by Kicso", 148, 205, { align: "center" });
+
+            doc.save(filename);
+        };
+
+        window.hasDownloadSalesReportPdf = () => typeof window.downloadSalesReportPdf === 'function';
+    </script>
+
+</body>
+</html>
