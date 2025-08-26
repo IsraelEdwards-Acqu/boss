@@ -1157,3 +1157,41 @@ footer {
     -o-animation: rotate14 8s infinite linear;
     animation: rotate14 8s infinite linear;
 }
+.navbar-logo {
+    max-height: 70px;
+    width: auto;
+}
+
+.modern-bar-link {
+    font-weight: 500;
+    padding: 0.5rem 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: #ffffff;
+    text-decoration: none;
+}
+
+    .modern-bar-link:hover {
+        background-color: rgba(255, 255, 255, 0.1);
+        border-radius: 5px;
+    }
+
+.warning-link {
+    color: #ffc107 !important;
+}
+
+@media (max-width: 768px) {
+    .modern-bar-link {
+        font-size: 0.95rem;
+        padding: 0.75rem 1rem;
+    }
+
+    .navbar-logo-link span {
+        display: none;
+    }
+}
+
+
+
+
