@@ -1,5 +1,5 @@
 self.assetsManifest = {
-  "version": "ncpjjW/M",
+  "version": "0JolvuaW",
   "assets": [
     {
       "hash": "sha256-vcRbcyM3HHt7VoDapZ115UZ/VPjqM/EhnePJ265Vn7c=",
@@ -346,8 +346,8 @@ self.assetsManifest = {
       "url": "_framework/Blazorise.Licensing.5q2r77toij.wasm"
     },
     {
-      "hash": "sha256-j6niUWlxCkCRkfqE6Qlt6t4Mom+2nh1RyjSkwbJ5Vlc=",
-      "url": "_framework/Boss.d9qua3c2q3.wasm"
+      "hash": "sha256-UD6Nhw8WRQ86fR2xbSHD1UonuTP/w/cNRbfTUdDQDRk=",
+      "url": "_framework/Boss.ctjcz321rj.wasm"
     },
     {
       "hash": "sha256-A+gS/Acjq6R5f2giac776P+Ovkh0OtImPn7y0TXO3eU=",
@@ -606,12 +606,12 @@ self.assetsManifest = {
       "url": "_framework/System.Memory.ompa8ege8x.wasm"
     },
     {
-      "hash": "sha256-3BT79mIWn99cGAegTFfVXZHjbTJAiYWHAoZVmvYvgK8=",
-      "url": "_framework/System.Net.Http.8hvum9c7t3.wasm"
-    },
-    {
       "hash": "sha256-hIF3CjMZqaaIoscXITsREuSQmvVANVxRSY2j/fBvwkU=",
       "url": "_framework/System.Net.Http.Json.0bbx7gigg4.wasm"
+    },
+    {
+      "hash": "sha256-ShycuZkZK0qcKH14mH2Y82nXkfdt1C+a5b1yyV0o5uI=",
+      "url": "_framework/System.Net.Http.ajwsg4vjt7.wasm"
     },
     {
       "hash": "sha256-F5GZ6MJVqFm+qbE9UAyBQ1b7NY9Uiz/OebJ6JZfv8F4=",
@@ -762,7 +762,7 @@ self.assetsManifest = {
       "url": "_framework/System.t8xd33e5pv.wasm"
     },
     {
-      "hash": "sha256-Ql1DNnCCTHiNPS13M1UENV/1L9wyE6lwchfUsFCosyU=",
+      "hash": "sha256-omiubCL8fG2vxBnmlYjmVL++PPX9qxTnzTkCFfpEIyo=",
       "url": "_framework/blazor.boot.json"
     },
     {
@@ -806,7 +806,7 @@ self.assetsManifest = {
       "url": "appsettings.json"
     },
     {
-      "hash": "sha256-3ZF00Wch/RxjHvy+vRpnJqp6d26gZQsRUdi56mexl1c=",
+      "hash": "sha256-8m4zsDEHCsihmlwcMXt5QnfR8+RvlAsPADEQmqj20cE=",
       "url": "css/app.css"
     },
     {
@@ -826,7 +826,7 @@ self.assetsManifest = {
       "url": "images/icon-192-kicso.png"
     },
     {
-      "hash": "sha256-hkBTLDNWFcAoIcvxapLHIgH/cdPVLlJB6OL2aOo85WE=",
+      "hash": "sha256-7kiuYG6IMl1sDI0wfXnjYLh/giToXlzNQHKnppVCJiQ=",
       "url": "index.html"
     },
     {
