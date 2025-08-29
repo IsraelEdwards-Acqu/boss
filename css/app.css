@@ -1155,6 +1155,24 @@ footer {
         display: none;
     }
 }
+.modern-bar-link {
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+    .modern-bar-link:hover {
+        background-color: rgba(255, 255, 255, 0.1);
+        color: #ffc107;
+    }
+.dropdown-item-animated {
+    transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+    .dropdown-item-animated:hover {
+        background-color: #f0f0f0;
+        transform: translateX(4px);
+    }
+
+
 
 
 
