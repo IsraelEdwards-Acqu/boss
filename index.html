@@ -95,7 +95,7 @@
     <script>
         let swRegistration;
 
-        if ('serviceWorker' in navigator /* register in dev too if you prefer */) {
+        if ('serviceWorker' in navigator) {
             navigator.serviceWorker.register('service-worker.js')
                 .then(reg => {
                     swRegistration = reg;
@@ -113,26 +113,21 @@
                 })
                 .catch(err => console.error('Service worker registration failed:', err));
         }
-
         function showUpdateToast() {
             const toastEl = document.getElementById('updateToast');
             if (!toastEl) return;
             const toast = new bootstrap.Toast(toastEl);
             toast.show();
         }
-
-        // Attempt to refresh via .NET method; fallback to hard reload
         function triggerBlazorRefresh() {
             const tryDotNet = () =>
                 typeof DotNet !== 'undefined' && DotNet.invokeMethodAsync
                     ? DotNet.invokeMethodAsync('Boss', 'TriggerRefresh').catch(() => location.reload())
                     : Promise.resolve(location.reload());
 
-            // If a waiting SW exists, ask it to activate, then refresh
             if (swRegistration && swRegistration.waiting) {
                 swRegistration.waiting.postMessage({ type: 'SKIP_WAITING' });
                 navigator.serviceWorker.addEventListener('controllerchange', () => {
-                    // force reload after the new SW takes control
                     location.reload();
                 });
             } else {
@@ -140,7 +135,6 @@
             }
         }
     </script>
-
     <!-- Custom Install Prompt -->
     <script>
         let deferredPrompt;
@@ -157,12 +151,13 @@
             });
         });
     </script>
+
     <script>
         window.downloadReceiptPdf = async (htmlContent, filename) => {
             const { jsPDF } = window.jspdf;
             const doc = new jsPDF();
 
-            const logoUrl = "icon-192.png"; // Replace with your actual logo path
+            const logoUrl = "icon-192.png";
             const qrData = htmlContent.includes("Receipt No:")
                 ? htmlContent.match(/Receipt No:\s*(RCPT-[\d\-]+)/)?.[1] || "RCPT-UNKNOWN"
                 : "RCPT-UNKNOWN";
@@ -176,7 +171,6 @@
             logoImg.src = logoUrl;
 
             logoImg.onload = async () => {
-                // Center logo
                 const pageWidth = doc.internal.pageSize.getWidth();
                 const logoWidth = 30;
                 const logoX = (pageWidth - logoWidth) / 2;
@@ -185,18 +179,16 @@
                 doc.setFontSize(14);
                 doc.text("CapitalPrint", pageWidth / 2, 45, { align: "center" });
 
-                // Convert HTML to plain text
                 const text = htmlContent.replace(/<[^>]+>/g, '');
                 doc.setFontSize(10);
                 doc.text(text, 10, 60);
 
-                // Add QR code
                 const qrImg = new Image();
                 qrImg.src = qrUrl;
 
                 qrImg.onload = () => {
                     const qrX = (pageWidth - 30) / 2;
-                    doc.addImage(qrImg, 'PNG', qrX, doc.lastAutoTable ? doc.lastAutoTable.finalY + 10 : 120, 30, 30);
+                    doc.addImage(qrImg, 'PNG', qrX, 120, 30, 30);
                     doc.setFontSize(8);
                     doc.text("Powered by Kicso", pageWidth / 2, 280, { align: "center" });
                     doc.save(filename);
@@ -208,6 +200,7 @@
                     doc.save(filename);
                 };
             };
+
             logoImg.onerror = () => {
                 console.warn("Logo failed to load.");
                 const text = htmlContent.replace(/<[^>]+>/g, '');
@@ -216,52 +209,7 @@
             };
         };
     </script>
-    <script>
-        window.getInnerHTML = function (elementId) {
-            const el = document.getElementById(elementId);
-            return el ? el.innerHTML : '';
-        };
-    </script>
-
-    <script>
-        window.printReceiptContent = function (elementId) {
-            const el = document.getElementById(elementId);
-            if (!el) {
-                alert("❌ Receipt element not found: " + elementId);
-                return;
-            }
-
-            const receiptHtml = el.outerHTML;
-            const win = window.open('', '_blank', 'width=400,height=600');
-            win.document.open();
-            win.document.write(`
-                <html>
-                    <head>
-                        <title>Receipt</title>
-                        <style>
-                            body { font-family: monospace; width: 80mm; padding: 10px; }
-                            img { display: block; margin: 0 auto; }
-                            hr { border: none; border-top: 1px dashed #000; margin: 8px 0; }
-                            .text-center { text-align: center; }
-                            .text-end { text-align: right; }
-                            .small { font-size: 10px; }
-                            .text-muted { color: #555; }
-                        </style>
-                    </head>
-                    <body>
-                        ${receiptHtml}
-                        <script>
-                            window.onload = function () {
-                                window.print();
-                                window.onafterprint = function () { window.close(); };
-                            };
-                        <\/script>
-                    </body>
-                </html>
-            `);
-            win.document.close();
-        };
-    </script>
+   
 
     <script>
         const minLoadingTime = 70000;
@@ -388,27 +336,27 @@
             const printWindow = window.open('', '_blank', 'width=800,height=600');
             printWindow.document.open();
             printWindow.document.write(`
-                <html>
-                    <head>
-                        <title>Pick-Ups</title>
-                        <style>
-                            body { font-family: Arial, sans-serif; padding: 10px; }
-                            table { border-collapse: collapse; width: 100%; }
-                            th, td { border: 1px solid #ccc; padding: 6px; text-align: left; }
-                            th { background-color: #f2f2f2; }
-                        </style>
-                    </head>
-                    <body>
-                        ${tableHtml}
-                        <script>
-                            window.onload = function () {
-                                window.print();
-                                window.onafterprint = function () { window.close(); };
-                            };
-                        <\/script>
-                    </body>
-                </html>
-            `);
+                                <html>
+                                    <head>
+                                        <title>Pick-Ups</title>
+                                        <style>
+                                            body { font-family: Arial, sans-serif; padding: 10px; }
+                                            table { border-collapse: collapse; width: 100%; }
+                                            th, td { border: 1px solid #ccc; padding: 6px; text-align: left; }
+                                            th { background-color: #f2f2f2; }
+                                        </style>
+                                    </head>
+                                    <body>
+                                        ${tableHtml}
+                                        <script>
+                                            window.onload = function () {
+                                                window.print();
+                                                window.onafterprint = function () { window.close(); };
+                                            };
+                                        <\/script>
+                                    </body>
+                                </html>
+                            `);
             printWindow.document.close();
         };
     </script>
