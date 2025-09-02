@@ -343,10 +343,23 @@ footer {
         margin: 0 auto;
     }
 
-/*body {
+#CustomLoader {
     background-color: #e0f8bd;
-    overflow: hidden;
-}*/
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 9999;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+    #CustomLoader.fade-out {
+        opacity: 0;
+        transition: opacity 0.5s ease-out;
+        pointer-events: none;
+    }
 .spinner {
     height: 150px;
     width: 150px;
