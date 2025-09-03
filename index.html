@@ -151,7 +151,6 @@
             });
         });
     </script>
-
     <script>
         window.downloadReceiptPdf = async (htmlContent, filename) => {
             const { jsPDF } = window.jspdf;
@@ -167,6 +166,12 @@
 
             const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=120x120&data=Receipt:${qrData},Total:GHS ${total},Contact:0244736472`;
 
+            // ✅ Extract payment methods from the HTML
+            const pmMatches = [...htmlContent.matchAll(/<span[^>]*class="[^"]*badge[^"]*"[^>]*>(.*?)<\/span>/g)]
+                .map(m => m[1].replace(/<[^>]+>/g, '').trim())
+                .filter(Boolean);
+            const pmText = pmMatches.length > 0 ? `Payment Methods: ${pmMatches.join(', ')}` : '';
+
             const logoImg = new Image();
             logoImg.src = logoUrl;
 
@@ -179,9 +184,15 @@
                 doc.setFontSize(14);
                 doc.text("CapitalPrint", pageWidth / 2, 45, { align: "center" });
 
+                // Strip HTML for the main text, but keep payment methods separately
                 const text = htmlContent.replace(/<[^>]+>/g, '');
                 doc.setFontSize(10);
                 doc.text(text, 10, 60);
+
+                if (pmText) {
+                    doc.setFontSize(10);
+                    doc.text(pmText, 10, 80); // Position below main text
+                }
 
                 const qrImg = new Image();
                 qrImg.src = qrUrl;
@@ -209,8 +220,15 @@
             };
         };
     </script>
-   
-
+    <script>
+        doc.html(document.getElementById('receiptContainer'), {
+            callback: function (doc) {
+                doc.save(filename);
+            },
+            x: 10,
+            y: 10
+        });
+    </script>
     <script>
         const minLoadingTime = 70000;
         const loader = document.getElementById('CustomLoader');
@@ -336,27 +354,27 @@
             const printWindow = window.open('', '_blank', 'width=800,height=600');
             printWindow.document.open();
             printWindow.document.write(`
-                                <html>
-                                    <head>
-                                        <title>Pick-Ups</title>
-                                        <style>
-                                            body { font-family: Arial, sans-serif; padding: 10px; }
-                                            table { border-collapse: collapse; width: 100%; }
-                                            th, td { border: 1px solid #ccc; padding: 6px; text-align: left; }
-                                            th { background-color: #f2f2f2; }
-                                        </style>
-                                    </head>
-                                    <body>
-                                        ${tableHtml}
-                                        <script>
-                                            window.onload = function () {
-                                                window.print();
-                                                window.onafterprint = function () { window.close(); };
-                                            };
-                                        <\/script>
-                                    </body>
-                                </html>
-                            `);
+                                    <html>
+                                        <head>
+                                            <title>Pick-Ups</title>
+                                            <style>
+                                                body { font-family: Arial, sans-serif; padding: 10px; }
+                                                table { border-collapse: collapse; width: 100%; }
+                                                th, td { border: 1px solid #ccc; padding: 6px; text-align: left; }
+                                                th { background-color: #f2f2f2; }
+                                            </style>
+                                        </head>
+                                        <body>
+                                            ${tableHtml}
+                                            <script>
+                                                window.onload = function () {
+                                                    window.print();
+                                                    window.onafterprint = function () { window.close(); };
+                                                };
+                                            <\/script>
+                                        </body>
+                                    </html>
+                                `);
             printWindow.document.close();
         };
     </script>
