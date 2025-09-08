@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Boss</title>
+    <base href="/" />
+
+    <!-- SEO & PWA Metadata -->
+    <meta name="description" content="Boss : Base Of Sale System – Fast, Secure, And Receptionist-Friendly." />
+    <!--<meta name="theme-color" content="#0d6efd" />-->
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="Boss" />
+    <meta name="theme-color" content="#007bff" />
+    <!-- Styles -->
+    <link rel="stylesheet" href="css/app.css" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" crossorigin="anonymous" />
+
+    <!-- Icons & Manifest -->
+    <link rel="icon" type="image/x-icon" href="favicon.ico" />
+    <link rel="manifest" href="manifest.webmanifest" />
+    <link rel="apple-touch-icon" sizes="512x512" href="icon-512.png" />
+    <link rel="apple-touch-icon" sizes="192x192" href="icon-192.png" />
+    <link rel="apple-touch-icon" href="images/icon-192-kicso.png" />
+    <!-- Preload critical assets -->
+    <link rel="preload" href="_framework/blazor.webassembly.js" as="script" />
+</head>
+<body>
+    <div id="app">
+        <div id="CustomLoader" class="spinner">
+            <!--<img src="images/icon-192-kicso.png" alt="CapitalPrint Logo" class="splash-logo" />-->
+            <div class="spinner">
+                <div id="square-1"></div>
+                <div id="square-2"></div>
+                <div id="square-3"></div>
+                <div id="square-4"></div>
+                <div id="square-5"></div>
+                <div id="square-6"></div>
+                <div id="square-7"></div>
+                <div id="square-8"></div>
+                <div id="square-9"></div>
+                <div id="square-10"></div>
+                <div id="square-11"></div>
+                <div id="square-12"></div>
+                <div id="square-13"></div>
+                <div id="square-14"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Install Button -->
+    <div class="position-fixed bottom-0 start-0 p-3">
+        <button id="install-btn" class="btn btn-primary" style="display:none;">Install BOSS</button>
+    </div>
+    <!-- Update Toast -->
+    <div class="toast-container position-fixed bottom-0 end-0 p-3">
+        <div id="updateToast" class="toast align-items-center text-bg-primary border-0" role="alert" aria-live="assertive" aria-atomic="true">
+            <div class="d-flex">
+                <div class="toast-body">
+                    A new version of Boss is available.
+                    <button class="btn btn-sm btn-light ms-2" onclick="triggerBlazorRefresh()">Refresh</button>
+                </div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+            </div>
+        </div>
+    </div>
+
+    <!-- JS Libraries -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.7.1/chart.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+    <!-- wwwroot/index.html -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet" />
+    <script src="js/chartExport.js"></script>
+
+    <!-- Blazor WebAssembly -->
+    <script src="_framework/blazor.webassembly.js"></script>
+    <script>
+        window.captureSalesTable = async function (elementId, filename) {
+            const element = document.getElementById(elementId);
+            if (!element) return;
+
+            const canvas = await html2canvas(element, { scale: 2 });
+            const link = document.createElement('a');
+            link.download = filename;
+            link.href = canvas.toDataURL();
+            link.click();
+        };
+    </script>
+
+    <!-- Service Worker Registration -->
+    <script>
+        let swRegistration;
+
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('service-worker.js')
+                .then(reg => {
+                    swRegistration = reg;
+                    console.log('Service worker registered:', reg);
+
+                    reg.onupdatefound = () => {
+                        const newWorker = reg.installing;
+                        if (!newWorker) return;
+                        newWorker.onstatechange = () => {
+                            if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                                showUpdateToast();
+                            }
+                        };
+                    };
+                })
+                .catch(err => console.error('Service worker registration failed:', err));
+        }
+        function showUpdateToast() {
+            const toastEl = document.getElementById('updateToast');
+            if (!toastEl) return;
+            const toast = new bootstrap.Toast(toastEl);
+            toast.show();
+        }
+        function triggerBlazorRefresh() {
+            const tryDotNet = () =>
+                typeof DotNet !== 'undefined' && DotNet.invokeMethodAsync
+                    ? DotNet.invokeMethodAsync('Boss', 'TriggerRefresh').catch(() => location.reload())
+                    : Promise.resolve(location.reload());
+
+            if (swRegistration && swRegistration.waiting) {
+                swRegistration.waiting.postMessage({ type: 'SKIP_WAITING' });
+                navigator.serviceWorker.addEventListener('controllerchange', () => {
+                    location.reload();
+                });
+            } else {
+                tryDotNet();
+            }
+        }
+    </script>
+    <!-- Custom Install Prompt -->
+    <script>
+        let deferredPrompt;
+        window.addEventListener('beforeinstallprompt', e => {
+            e.preventDefault();
+            deferredPrompt = e;
+            const installBtn = document.getElementById('install-btn');
+            installBtn.style.display = 'block';
+            installBtn.addEventListener('click', async () => {
+                installBtn.style.display = 'none';
+                deferredPrompt.prompt();
+                await deferredPrompt.userChoice;
+                deferredPrompt = null;
+            });
+        });
+    </script>
+    <script>
+        window.downloadReceiptPdf = async (htmlContent, filename) => {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+
+            const logoUrl = "icon-192.png";
+            const qrData = htmlContent.includes("Receipt No:")
+                ? htmlContent.match(/Receipt No:\s*(RCPT-[\d\-]+)/)?.[1] || "RCPT-UNKNOWN"
+                : "RCPT-UNKNOWN";
+
+            const totalMatch = htmlContent.match(/Total:\s*GHS\s*(\d+(\.\d+)?)/);
+            const total = totalMatch ? totalMatch[1] : "0.00";
+
+            const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=120x120&data=Receipt:${qrData},Total:GHS ${total},Contact:0244736472`;
+
+            // ✅ Extract payment methods from the HTML
+            const pmMatches = [...htmlContent.matchAll(/<span[^>]*class="[^"]*badge[^"]*"[^>]*>(.*?)<\/span>/g)]
+                .map(m => m[1].replace(/<[^>]+>/g, '').trim())
+                .filter(Boolean);
+            const pmText = pmMatches.length > 0 ? `Payment Methods: ${pmMatches.join(', ')}` : '';
+
+            const logoImg = new Image();
+            logoImg.src = logoUrl;
+
+            logoImg.onload = async () => {
+                const pageWidth = doc.internal.pageSize.getWidth();
+                const logoWidth = 30;
+                const logoX = (pageWidth - logoWidth) / 2;
+
+                doc.addImage(logoImg, 'PNG', logoX, 10, logoWidth, logoWidth);
+                doc.setFontSize(14);
+                doc.text("CapitalPrint", pageWidth / 2, 45, { align: "center" });
+
+                // Strip HTML for the main text, but keep payment methods separately
+                const text = htmlContent.replace(/<[^>]+>/g, '');
+                doc.setFontSize(10);
+                doc.text(text, 10, 60);
+
+                if (pmText) {
+                    doc.setFontSize(10);
+                    doc.text(pmText, 10, 80); // Position below main text
+                }
+
+                const qrImg = new Image();
+                qrImg.src = qrUrl;
+
+                qrImg.onload = () => {
+                    const qrX = (pageWidth - 30) / 2;
+                    doc.addImage(qrImg, 'PNG', qrX, 120, 30, 30);
+                    doc.setFontSize(8);
+                    doc.text("Powered by Kicso", pageWidth / 2, 280, { align: "center" });
+                    doc.save(filename);
+                };
+
+                qrImg.onerror = () => {
+                    console.warn("QR code failed to load.");
+                    doc.text("Powered by Kicso", pageWidth / 2, 280, { align: "center" });
+                    doc.save(filename);
+                };
+            };
+
+            logoImg.onerror = () => {
+                console.warn("Logo failed to load.");
+                const text = htmlContent.replace(/<[^>]+>/g, '');
+                doc.text(text, 10, 10);
+                doc.save(filename);
+            };
+        };
+    </script>
+    <script>
+        doc.html(document.getElementById('receiptContainer'), {
+            callback: function (doc) {
+                doc.save(filename);
+            },
+            x: 10,
+            y: 10
+        });
+    </script>
+    <script>
+        const minLoadingTime = 70000;
+        const loader = document.getElementById('CustomLoader');
+        const start = Date.now();
+
+        window.addEventListener('DOMContentLoaded', () => {
+            const elapsed = Date.now() - start;
+            const remaining = minLoadingTime - elapsed;
+            setTimeout(() => {
+                if (loader) loader.style.display = 'none';
+            }, remaining > 0 ? remaining : 0);
+        });
+    </script>
+
+    <script>
+        window.downloadSalesReportPdf = (plainText, filename) => {
+            const { jsPDF } = window.jspdf;
+            if (!jsPDF) {
+                console.error('jsPDF missing');
+                return;
+            }
+
+            const doc = new jsPDF({ orientation: "landscape" });
+            const lines = plainText.split('\n').filter(l => l.trim().length > 0);
+            let y = 20;
+
+            doc.setFontSize(18);
+            doc.text("Sales Report", 148, y, { align: "center" });
+            y += 12;
+
+            doc.setFontSize(10);
+            doc.text("Exported: " + new Date().toLocaleString(), 10, y);
+            y += 8;
+
+            doc.setFontSize(12);
+            doc.setFillColor(220, 220, 220);
+            doc.rect(10, y - 6, 277, 10, 'F');
+            const headers = ["Product", "Color", "Type", "Qty", "Unit Price", "Total", "Time", "Buyer"];
+            let x = 10;
+            const colWidths = [40, 22, 22, 15, 28, 28, 55, 45];
+            headers.forEach((h, i) => {
+                doc.text(h, x + 2, y);
+                x += colWidths[i];
+            });
+            y += 8;
+
+            doc.setFontSize(10);
+            for (let i = 3; i < lines.length; i++) {
+                const row = lines[i].split('\t');
+                if (row.length < 8) continue;
+                x = 10;
+                row.forEach((cell, j) => {
+                    doc.text(cell, x + 2, y);
+                    x += colWidths[j];
+                });
+                y += 7;
+                if (y > 190) {
+                    doc.addPage("landscape");
+                    y = 20;
+                }
+            }
+
+            doc.setFontSize(9);
+            doc.setTextColor(120, 120, 120);
+            doc.text("Powered by Kicso", 148, 205, { align: "center" });
+
+            doc.save(filename);
+        };
+
+        window.hasDownloadSalesReportPdf = () => typeof window.downloadSalesReportPdf === 'function';
+    </script>
+
+    <script>
+        window.captureSalesTableAsDataUrl = async function (elementId) {
+            const element = document.getElementById(elementId);
+            if (!element) return null;
+
+            const canvas = await html2canvas(element, { scale: 2 });
+            return canvas.toDataURL("image/png");
+        };
+
+        window.downloadImageFromDataUrl = function (dataUrl, filename) {
+            const link = document.createElement('a');
+            link.href = dataUrl;
+            link.download = filename;
+            link.click();
+        };
+    </script>
+
+    <script>
+        // Wait for all images inside an element to fully load (including the QR)
+        async function waitForElementImages(element) {
+            const imgs = Array.from(element.querySelectorAll('img'));
+            if (imgs.length === 0) return;
+
+            await Promise.all(imgs.map(img => {
+                if (img.complete && img.naturalWidth > 0) return Promise.resolve();
+                return new Promise(resolve => {
+                    const done = () => resolve();
+                    img.addEventListener('load', done, { once: true });
+                    img.addEventListener('error', done, { once: true }); // proceed even if one fails
+                });
+            }));
+        }
+
+        window.captureAndUploadReceipt = async function (elementId, apiKey) {
+            try {
+                const element = document.getElementById(elementId);
+                if (!element) return null;
+
+                // Ensure all images (QR/logo) are loaded before capture
+                await waitForElementImages(element);
+
+                // Capture with CORS enabled and a white background
+                const canvas = await html2canvas(element, {
+                    scale: 2,
+                    useCORS: true,
+                    backgroundColor: '#ffffff',
+                    logging: false
+                });
+
+                const imageBase64 = canvas.toDataURL("image/png").split(',')[1];
+
+                const formData = new FormData();
+                formData.append("image", imageBase64);
+
+                const response = await fetch(`https://api.imgbb.com/1/upload?key=${apiKey}`, {
+                    method: "POST",
+                    body: formData
+                });
+
+                if (!response.ok) return null;
+
+                const result = await response.json();
+                if (result && result.data && (result.data.url || result.data.display_url)) {
+                    // Prefer the direct URL if provided, fallback to display URL
+                    return result.data.url || result.data.display_url;
+                }
+                return null;
+            } catch {
+                return null;
+            }
+        };
+    </script>
+
+
+    <script>
+        window.printElementById = function (elementId) {
+            const el = document.getElementById(elementId);
+            if (!el) {
+                alert("❌ Table element not found: " + elementId);
+                return;
+            }
+
+            const tableHtml = el.outerHTML;
+            const printWindow = window.open('', '_blank', 'width=800,height=600');
+            printWindow.document.open();
+            printWindow.document.write(`
+                                            <html>
+                                                <head>
+                                                    <title>Pick-Ups</title>
+                                                    <style>
+                                                        body { font-family: Arial, sans-serif; padding: 10px; }
+                                                        table { border-collapse: collapse; width: 100%; }
+                                                        th, td { border: 1px solid #ccc; padding: 6px; text-align: left; }
+                                                        th { background-color: #f2f2f2; }
+                                                    </style>
+                                                </head>
+                                                <body>
+                                                    ${tableHtml}
+                                                    <script>
+                                                        window.onload = function () {
+                                                            window.print();
+                                                            window.onafterprint = function () { window.close(); };
+                                                        };
+                                                    <\/script>
+                                                </body>
+                                            </html>
+                                        `);
+            printWindow.document.close();
+        };
+    </script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+            tooltipTriggerList.map(function (tooltipTriggerEl) {
+                return new bootstrap.Tooltip(tooltipTriggerEl)
+            })
+        });
+    </script>
+</body>
+</html>
