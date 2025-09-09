@@ -1,5 +1,5 @@
 self.assetsManifest = {
-  "version": "gsCZ5QTe",
+  "version": "+6QRbXta",
   "assets": [
     {
       "hash": "sha256-vcRbcyM3HHt7VoDapZ115UZ/VPjqM/EhnePJ265Vn7c=",
@@ -346,8 +346,8 @@ self.assetsManifest = {
       "url": "_framework/Blazorise.Licensing.5q2r77toij.wasm"
     },
     {
-      "hash": "sha256-760YtmLsrJmufg9M70I7kTWbP5bvZGVN2VFcMfJZDao=",
-      "url": "_framework/Boss.tti77syed8.wasm"
+      "hash": "sha256-JDD4ovHgvw08PC94VtCUCwqhq4ukpBnhLKtqBJBn4Ic=",
+      "url": "_framework/Boss.ko3ip1334d.wasm"
     },
     {
       "hash": "sha256-A+gS/Acjq6R5f2giac776P+Ovkh0OtImPn7y0TXO3eU=",
@@ -762,7 +762,7 @@ self.assetsManifest = {
       "url": "_framework/System.t8xd33e5pv.wasm"
     },
     {
-      "hash": "sha256-mNqvXUirGaV/I6/iHCbR6ktK4rcl2oJx6OI1nLrRxmI=",
+      "hash": "sha256-W3q4G2Wb6slhbZzcdZ1gNwwjvTKiRY3GnYAkbQo/lBc=",
       "url": "_framework/blazor.boot.json"
     },
     {
@@ -826,7 +826,7 @@ self.assetsManifest = {
       "url": "images/icon-192-kicso.png"
     },
     {
-      "hash": "sha256-rAkR+xYO8mv7/zZnVpc2okvqJheTcqaIVGo9WaDKukg=",
+      "hash": "sha256-Mlt+rBEZPKErSrgAvlDZYyYa/inNDgiGMQpniBnUYgw=",
       "url": "index.html"
     },
     {

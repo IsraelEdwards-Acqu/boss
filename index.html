@@ -157,20 +157,33 @@
             const doc = new jsPDF();
 
             const logoUrl = "icon-192.png";
+
+            // Extract receipt number
             const qrData = htmlContent.includes("Receipt No:")
                 ? htmlContent.match(/Receipt No:\s*(RCPT-[\d\-]+)/)?.[1] || "RCPT-UNKNOWN"
                 : "RCPT-UNKNOWN";
 
+            // Extract total amount
             const totalMatch = htmlContent.match(/Total:\s*GHS\s*(\d+(\.\d+)?)/);
             const total = totalMatch ? totalMatch[1] : "0.00";
 
+            // Generate QR code URL
             const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=120x120&data=Receipt:${qrData},Total:GHS ${total},Contact:0244736472`;
 
-            // ✅ Extract payment methods from the HTML
+            // ✅ Extract payment methods from badge spans with icons
             const pmMatches = [...htmlContent.matchAll(/<span[^>]*class="[^"]*badge[^"]*"[^>]*>(.*?)<\/span>/g)]
-                .map(m => m[1].replace(/<[^>]+>/g, '').trim())
+                .map(m => {
+                    const raw = m[1];
+                    const cleaned = raw.replace(/<i[^>]*>.*?<\/i>/g, '') // remove icons
+                        .replace(/<[^>]+>/g, '')         // remove other tags
+                        .trim();
+                    return cleaned;
+                })
                 .filter(Boolean);
-            const pmText = pmMatches.length > 0 ? `Payment Methods: ${pmMatches.join(', ')}` : '';
+
+            const pmText = pmMatches.length > 0
+                ? `Payment Method${pmMatches.length > 1 ? 's' : ''}: ${pmMatches.join(', ')}`
+                : '';
 
             const logoImg = new Image();
             logoImg.src = logoUrl;
@@ -184,14 +197,16 @@
                 doc.setFontSize(14);
                 doc.text("CapitalPrint", pageWidth / 2, 45, { align: "center" });
 
-                // Strip HTML for the main text, but keep payment methods separately
+                // Strip HTML for main receipt text
                 const text = htmlContent.replace(/<[^>]+>/g, '');
                 doc.setFontSize(10);
                 doc.text(text, 10, 60);
 
+                // ✅ Render payment methods clearly below receipt content
                 if (pmText) {
                     doc.setFontSize(10);
-                    doc.text(pmText, 10, 80); // Position below main text
+                    doc.setTextColor(40, 40, 40);
+                    doc.text(pmText, 10, 75);
                 }
 
                 const qrImg = new Image();
@@ -201,12 +216,15 @@
                     const qrX = (pageWidth - 30) / 2;
                     doc.addImage(qrImg, 'PNG', qrX, 120, 30, 30);
                     doc.setFontSize(8);
+                    doc.setTextColor(150, 150, 150);
                     doc.text("Powered by Kicso", pageWidth / 2, 280, { align: "center" });
                     doc.save(filename);
                 };
 
                 qrImg.onerror = () => {
                     console.warn("QR code failed to load.");
+                    doc.setFontSize(8);
+                    doc.setTextColor(150, 150, 150);
                     doc.text("Powered by Kicso", pageWidth / 2, 280, { align: "center" });
                     doc.save(filename);
                 };
@@ -215,6 +233,7 @@
             logoImg.onerror = () => {
                 console.warn("Logo failed to load.");
                 const text = htmlContent.replace(/<[^>]+>/g, '');
+                doc.setFontSize(10);
                 doc.text(text, 10, 10);
                 doc.save(filename);
             };
@@ -302,11 +321,32 @@
     </script>
 
     <script>
+        async function waitForImagesBeforeCapture(element) {
+            const imgs = Array.from(element.querySelectorAll('img'));
+            if (imgs.length === 0) return;
+
+            await Promise.all(imgs.map(img => {
+                if (img.complete && img.naturalWidth > 0) return Promise.resolve();
+                return new Promise(resolve => {
+                    img.onload = resolve;
+                    img.onerror = resolve;
+                });
+            }));
+        }
+
         window.captureSalesTableAsDataUrl = async function (elementId) {
             const element = document.getElementById(elementId);
             if (!element) return null;
 
-            const canvas = await html2canvas(element, { scale: 2 });
+            // ✅ Wait for QR and other images to fully load
+            await waitForImagesBeforeCapture(element);
+
+            const canvas = await html2canvas(element, {
+                scale: 2,
+                useCORS: true,
+                backgroundColor: '#ffffff'
+            });
+
             return canvas.toDataURL("image/png");
         };
 
@@ -373,8 +413,6 @@
             }
         };
     </script>
-
-
     <script>
         window.printElementById = function (elementId) {
             const el = document.getElementById(elementId);
@@ -387,27 +425,27 @@
             const printWindow = window.open('', '_blank', 'width=800,height=600');
             printWindow.document.open();
             printWindow.document.write(`
-                                            <html>
-                                                <head>
-                                                    <title>Pick-Ups</title>
-                                                    <style>
-                                                        body { font-family: Arial, sans-serif; padding: 10px; }
-                                                        table { border-collapse: collapse; width: 100%; }
-                                                        th, td { border: 1px solid #ccc; padding: 6px; text-align: left; }
-                                                        th { background-color: #f2f2f2; }
-                                                    </style>
-                                                </head>
-                                                <body>
-                                                    ${tableHtml}
-                                                    <script>
-                                                        window.onload = function () {
-                                                            window.print();
-                                                            window.onafterprint = function () { window.close(); };
-                                                        };
-                                                    <\/script>
-                                                </body>
-                                            </html>
-                                        `);
+                                                        <html>
+                                                            <head>
+                                                                <title>Pick-Ups</title>
+                                                                <style>
+                                                                    body { font-family: Arial, sans-serif; padding: 10px; }
+                                                                    table { border-collapse: collapse; width: 100%; }
+                                                                    th, td { border: 1px solid #ccc; padding: 6px; text-align: left; }
+                                                                    th { background-color: #f2f2f2; }
+                                                                </style>
+                                                            </head>
+                                                            <body>
+                                                                ${tableHtml}
+                                                                <script>
+                                                                    window.onload = function () {
+                                                                        window.print();
+                                                                        window.onafterprint = function () { window.close(); };
+                                                                    };
+                                                                <\/script>
+                                                            </body>
+                                                        </html>
+                                                    `);
             printWindow.document.close();
         };
     </script>
@@ -419,5 +457,37 @@
             })
         });
     </script>
+    <script>
+        window.bossTooltips = {
+            refresh: function (rootSelector) {
+                const root = rootSelector ? document.querySelector(rootSelector) : document;
+                if (!root) return;
+
+                // Dispose any existing tooltips under root
+                const existing = root.querySelectorAll('[data-bs-toggle="tooltip"]');
+                existing.forEach(el => {
+                    const inst = bootstrap.Tooltip.getInstance(el);
+                    if (inst) inst.dispose();
+                });
+
+                // Initialize with HTML support
+                const triggers = [].slice.call(root.querySelectorAll('[data-bs-toggle="tooltip"]'));
+                triggers.forEach(el => {
+                    new bootstrap.Tooltip(el, {
+                        html: true,
+                        sanitize: false,       // allows your inline icons/layout
+                        container: 'body',
+                        boundary: 'viewport',
+                        placement: el.getAttribute('data-bs-placement') || 'top',
+                        trigger: 'hover focus'
+                    });
+                });
+            }
+        };
+
+        // Optional: auto-refresh after page load
+        document.addEventListener('DOMContentLoaded', () => window.bossTooltips.refresh());
+    </script>
+
 </body>
 </html>
