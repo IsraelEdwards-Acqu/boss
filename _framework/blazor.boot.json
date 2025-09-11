@@ -1,7 +1,7 @@
 {
   "mainAssemblyName": "Boss",
   "resources": {
-    "hash": "sha256-Bef/uAYUZkleJlKlSlr2lPt9RIxQ29bhmRKaKWBhc0M=",
+    "hash": "sha256-HuVv/Dj5WMfux5igUF0CgQ8KQBJ9h8CL/ZoFOxNPEBY=",
     "fingerprinting": {
       "BCrypt.Net-Next.atqw2jgj6x.wasm": "BCrypt.Net-Next.wasm",
       "Blazored.Toast.4gbrhkrum5.wasm": "Blazored.Toast.wasm",
@@ -114,7 +114,7 @@
       "System.m0fu6d0eya.wasm": "System.wasm",
       "netstandard.cqh6c9w4pn.wasm": "netstandard.wasm",
       "System.Private.CoreLib.heg6wve9bo.wasm": "System.Private.CoreLib.wasm",
-      "Boss.09znjl7zys.wasm": "Boss.wasm",
+      "Boss.2zhagozg0s.wasm": "Boss.wasm",
       "dotnet.native.cwp8732cco.js": "dotnet.native.js",
       "dotnet.native.oy41bfiwue.wasm": "dotnet.native.wasm",
       "dotnet.js": "dotnet.js",
@@ -251,7 +251,7 @@
       "System.Xml.XDocument.7lwqr4899m.wasm": "sha256-e3L7s5yS/QYP10aPEIzvCa+38xNs3qtSsbLAJgQ4nfw=",
       "System.m0fu6d0eya.wasm": "sha256-hkGLo/MuT/FJ0Xf4XUL0D2VA4dZV532GHNB1JicxLko=",
       "netstandard.cqh6c9w4pn.wasm": "sha256-vBCYvesZimGh/pldIhSclkd5XNSvvjS39qxLxz0t1Eo=",
-      "Boss.09znjl7zys.wasm": "sha256-zFY6TK/dQla7de04IlQ95jyVsHKeLnveDtCjZySxtgU="
+      "Boss.2zhagozg0s.wasm": "sha256-fhkk56wWf0ZOv8265XrnLXsOAbkU9+/w+PnHtj9H0Q8="
     }
   },
   "cacheBootResources": true,
