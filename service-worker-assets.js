@@ -1,5 +1,5 @@
 self.assetsManifest = {
-  "version": "ci6+zMQw",
+  "version": "JBP94yU/",
   "assets": [
     {
       "hash": "sha256-vcRbcyM3HHt7VoDapZ115UZ/VPjqM/EhnePJ265Vn7c=",
@@ -346,8 +346,8 @@ self.assetsManifest = {
       "url": "_framework/Blazorise.Licensing.5q2r77toij.wasm"
     },
     {
-      "hash": "sha256-9fJWcA1uzA1KgvOlYBPD5XoP3FAlCM+oQi2kF5+wwCY=",
-      "url": "_framework/Boss.d2unvfesas.wasm"
+      "hash": "sha256-zFY6TK/dQla7de04IlQ95jyVsHKeLnveDtCjZySxtgU=",
+      "url": "_framework/Boss.09znjl7zys.wasm"
     },
     {
       "hash": "sha256-A+gS/Acjq6R5f2giac776P+Ovkh0OtImPn7y0TXO3eU=",
@@ -366,16 +366,16 @@ self.assetsManifest = {
       "url": "_framework/Google.Api.Gax.hguuut0ylh.wasm"
     },
     {
-      "hash": "sha256-BQZmcERYlzYZZR6ZMfHMNbHn3NaahRwNSYDCT9r0Sg0=",
-      "url": "_framework/Google.Apis.Auth.hdutbzzhln.wasm"
+      "hash": "sha256-jdOYBTyFGNUHMwSHENa7dCp3yRdQdA931FfvsdhrxKY=",
+      "url": "_framework/Google.Apis.Auth.1ntqzahhcj.wasm"
     },
     {
-      "hash": "sha256-ZJbUx6BHuzcdqeDElFsJ1+cYzyTyVisWXwQWJjMxixY=",
-      "url": "_framework/Google.Apis.Core.8jboq7vato.wasm"
+      "hash": "sha256-fWW3ARtmt+ejG+Y3cQwB8gJKg8BUbC92Rpo/X3Tk9a4=",
+      "url": "_framework/Google.Apis.Core.778oj6xa1g.wasm"
     },
     {
-      "hash": "sha256-XcsNSetbd049F/SxdqrKodylx/hxhc7VhTmTARzfCH4=",
-      "url": "_framework/Google.Apis.lux08il168.wasm"
+      "hash": "sha256-LMA32vI5P/LX+Imkf5xS+L/qgd4cJxGKXnBxWY4Mw+w=",
+      "url": "_framework/Google.Apis.koei1tfs0n.wasm"
     },
     {
       "hash": "sha256-Rd8z95ZQ7ijS8NSgLJS4LJjNweghMb5MiAOk6qIghM8=",
@@ -494,8 +494,8 @@ self.assetsManifest = {
       "url": "_framework/Newtonsoft.Json.qkbufwhni2.wasm"
     },
     {
-      "hash": "sha256-BrVoXNodIo7lrCNHkEOfe9dQUyLF3kTO9/gcXQYfQNg=",
-      "url": "_framework/QuestPDF.mxo7dpeb3a.wasm"
+      "hash": "sha256-HbHdR+gsLpFNoq768C1kDpz4hEu1Ipia8CctAcOHpQA=",
+      "url": "_framework/QuestPDF.dw1mm2irta.wasm"
     },
     {
       "hash": "sha256-bfK544jMUpUiNA09b7vzgsWbHoETYSwxx8thBEVhKrE=",
@@ -762,7 +762,7 @@ self.assetsManifest = {
       "url": "_framework/System.m0fu6d0eya.wasm"
     },
     {
-      "hash": "sha256-OZi7ZqTYj1sFcVpxEPnQ1CdHmmPCPolhvkV5dUyzJC8=",
+      "hash": "sha256-DsCE997UwBMNx8AkTw1kawfvJxLz6jfGA9sqYyvqHG8=",
       "url": "_framework/blazor.boot.json"
     },
     {
